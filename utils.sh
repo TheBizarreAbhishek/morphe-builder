@@ -6,10 +6,7 @@ TEMP_DIR="temp"
 BIN_DIR="bin"
 BUILD_DIR="build"
 DL_SRCS=("direct" "apkmirror" "uptodown")
-if [ -z "${KEYSTORE_PASSWORD-}" ]; then
-	abort "ERROR: 'KEYSTORE_PASSWORD' environment variable is not set. Please set it before running the build."
-fi
-KS_PASS="${KEYSTORE_PASSWORD}"
+KS_PASS="${KEYSTORE_PASSWORD-}"
 
 if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}

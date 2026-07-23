@@ -7,6 +7,10 @@ source utils.sh
 
 trap "abort" INT
 
+if [ -z "${KEYSTORE_PASSWORD-}" ] && [ "${1-}" != "clean" ]; then
+	abort "ERROR: 'KEYSTORE_PASSWORD' environment variable is not set. Please set it before running the build."
+fi
+
 if [ "${1-}" = "clean" ]; then
 	rm -r "$TEMP_DIR" "$BUILD_DIR" build.md
 	exit 0

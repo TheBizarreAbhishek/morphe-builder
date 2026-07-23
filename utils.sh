@@ -301,6 +301,9 @@ get_patch_last_supported_ver() {
 	if echo "$op" | grep -q -i "Any"; then
 		return
 	fi
+	if ! echo "$op" | grep -q -F "compatible versions:"; then
+		return 0
+	fi
 	op=$(sed -n '/Most common compatible versions:/,$p' <<<"$op" | sed '1d' | awk '{$1=$1}1')
 	if [ "$op" = "Any" ]; then return; fi
 	pcount=$(head -1 <<<"$op") pcount=${pcount#*(} pcount=${pcount% *}

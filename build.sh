@@ -71,6 +71,27 @@ gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releas
 gh_dl "${MODULE_TEMPLATE_DIR}/bin/x86/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-x86"
 gh_dl "${MODULE_TEMPLATE_DIR}/bin/x64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-x86_64"
 
+if [ ! -d "${MODULE_TEMPLATE_DIR}/zygisk" ]; then
+	pr "Downloading and caching Zygisk Detach..."
+	mkdir -p temp_zygisk
+	URL=$(curl -s "https://api.github.com/repos/j-hc/zygisk-detach/releases/latest" | jq -r '.assets[] | select(.name | endswith(".zip")) | .browser_download_url')
+	if [ "$URL" ] && [ "$URL" != "null" ]; then
+		if curl -L -o temp_zygisk/zygisk-detach.zip "$URL"; then
+			unzip -o -d temp_zygisk temp_zygisk/zygisk-detach.zip
+			cp -rf temp_zygisk/zygisk "${MODULE_TEMPLATE_DIR}/"
+			cp -f temp_zygisk/bin/arm/detach "${MODULE_TEMPLATE_DIR}/bin/arm/"
+			cp -f temp_zygisk/bin/arm/ksu_profile "${MODULE_TEMPLATE_DIR}/bin/arm/"
+			cp -f temp_zygisk/bin/arm64/detach "${MODULE_TEMPLATE_DIR}/bin/arm64/"
+			cp -f temp_zygisk/bin/arm64/ksu_profile "${MODULE_TEMPLATE_DIR}/bin/arm64/"
+			cp -f temp_zygisk/bin/x86/detach "${MODULE_TEMPLATE_DIR}/bin/x86/"
+			cp -f temp_zygisk/bin/x86/ksu_profile "${MODULE_TEMPLATE_DIR}/bin/x86/"
+			cp -f temp_zygisk/bin/x64/detach "${MODULE_TEMPLATE_DIR}/bin/x64/"
+			cp -f temp_zygisk/bin/x64/ksu_profile "${MODULE_TEMPLATE_DIR}/bin/x64/"
+		fi
+	fi
+	rm -rf temp_zygisk
+fi
+
 idx=0
 for table_name in $(toml_get_table_names); do
 	if [ -z "$table_name" ]; then continue; fi

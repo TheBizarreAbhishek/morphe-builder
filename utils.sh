@@ -863,6 +863,8 @@ build_rv() {
 		local upj="${table,,}-update.json"
 
 		module_config "$base_template" "$pkg_name" "$version" "$arch"
+		echo "$pkg_name" > "${base_template}/detach.txt"
+
 
 		local patches_ver="${patches_jar##*-}"
 		module_prop \

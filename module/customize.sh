@@ -227,6 +227,58 @@ if [ "$KSU" ]; then
 	fi
 fi
 
+if [ -d "$MODPATH/zygisk" ]; then
+	ui_print "[+] Zygisk Detach: Integrating Play Store detach engine..."
+	chmod -R +x "$MODPATH/bin/"
+	
+	# Configure vending UID for KernelSU
+	if [ -n "$KSU" ]; then
+		ui_print "    * KernelSU detected. Configuring Zygisk profile for Play Store..."
+		vending_uid=$(dumpsys package "com.android.vending" 2>&1 | grep -m1 "uid")
+		vending_uid=${vending_uid#*=} vending_uid=${vending_uid%% *}
+		if [ -z "$vending_uid" ]; then
+			vending_uid=$(dumpsys package "com.android.vending" 2>&1 | grep -m1 "userId")
+			vending_uid=${vending_uid#*=} vending_uid=${vending_uid%% *}
+		fi
+		if [ -n "$vending_uid" ]; then
+			"$MODPATH/bin/$ARCH/ksu_profile" "$vending_uid" "com.android.vending" >/dev/null 2>&1
+		fi
+	fi
+	
+	# Relocate detach CLI tool
+	mv -f "$MODPATH/bin/$ARCH/detach" "$MODPATH/detach"
+	chmod +x "$MODPATH/detach"
+	
+	# Configure detach list
+	if [ -f "$MODPATH/detach.txt" ]; then
+		mkdir -p /data/adb/zygisk-detach
+		DBIN="/data/adb/zygisk-detach/detach.bin"
+		
+		# If detach.bin already exists, we use the detach CLI to add our package name
+		# to the existing detach.bin file safely so we don't wipe user's other detached apps!
+		if [ -f "$DBIN" ]; then
+			ui_print "    * Existing detach list found. Adding $PKG_NAME safely..."
+			while IFS= read -r pkg || [ -n "$pkg" ]; do
+				[ -z "$pkg" ] && continue
+				"$MODPATH/detach" add "$pkg" >/dev/null 2>&1
+			done < "$MODPATH/detach.txt"
+		else
+			ui_print "    * Creating new detach list..."
+			"$MODPATH"/detach serialize "$MODPATH/detach.txt" "$DBIN" >/dev/null 2>&1
+		fi
+		rm -f "$MODPATH/detach.txt"
+	fi
+	
+	# Termux helper script
+	local mod_id
+	mod_id=$(basename "$MODPATH")
+	CLIPATH=/data/data/com.termux/files/usr/bin
+	if [ -d "$CLIPATH" ]; then
+		echo "su -c /data/adb/modules/$mod_id/detach \"\$@\"" > "$CLIPATH/detach"
+		chmod 777 "$CLIPATH/detach"
+	fi
+fi
+
 rm -rf "${MODPATH:?}/bin" "$MODPATH/stock/"
 cp -f "$MODPATH/module.prop" "$MODPATH/module.prop.orig"
 

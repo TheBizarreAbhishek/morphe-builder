@@ -1,6 +1,6 @@
 {
   "version": "v9.15.51 (patches 1.36.0.mpp)",
-  "versionCode": 2,
-  "zipUrl": "https://github.com/TheBizarreAbhishek/morphe-builder/releases/download/2/music-morphe-module-v9.15.51-arm64-v8a.zip",
+  "versionCode": 3,
+  "zipUrl": "https://github.com/TheBizarreAbhishek/morphe-builder/releases/download/3/music-morphe-module-v9.15.51-arm64-v8a.zip",
   "changelog": "https://raw.githubusercontent.com/TheBizarreAbhishek/morphe-builder/update/build.md"
 }

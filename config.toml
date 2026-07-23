@@ -74,6 +74,9 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/twitch-interactive-inc/twitch/"
 uptodown-dlurl = "https://twitch.en.uptodown.com/android"
 
 [Instagram]
+patches-source = "crimera/piko"
+cli-source = "MorpheApp/morphe-cli"
+rv-brand = "Piko"
 build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/instagram/"
 uptodown-dlurl = "https://instagram.en.uptodown.com/android"

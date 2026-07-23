@@ -2,26 +2,6 @@
 MODDIR=${0%/*}
 . "$MODDIR/utils.sh"
 
-detach_playstore() {
-	local sqlite_cmd=""
-	if command -v sqlite3 >/dev/null 2>&1; then
-		sqlite_cmd="sqlite3"
-	elif [ -f "/data/adb/bizarre/sqlite3" ]; then
-		sqlite_cmd="/data/adb/bizarre/sqlite3"
-	fi
-
-	if [ "$sqlite_cmd" ]; then
-		am force-stop com.android.vending
-		if [ -f "/data/data/com.android.vending/databases/localappstate.db" ]; then
-			"$sqlite_cmd" /data/data/com.android.vending/databases/localappstate.db "DELETE FROM package_state WHERE package_name = '$PKG_NAME';" >/dev/null 2>&1
-		fi
-		if [ -f "/data/data/com.android.vending/databases/library.db" ]; then
-			"$sqlite_cmd" /data/data/com.android.vending/databases/library.db "DELETE FROM ownership WHERE doc_id = '$PKG_NAME';" >/dev/null 2>&1
-			"$sqlite_cmd" /data/data/com.android.vending/databases/library.db "DELETE FROM ownership WHERE package_name = '$PKG_NAME';" >/dev/null 2>&1
-		fi
-		am force-stop com.android.vending
-	fi
-}
 
 monitor_app_launch() {
 	local fail_count=0
@@ -55,7 +35,6 @@ run() {
 	sleep 4
 
 	if mount_rv "$BASEPATH"; then
-		detach_playstore
 		monitor_app_launch &
 	fi
 }

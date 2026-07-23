@@ -5,7 +5,7 @@ CWD=$(pwd)
 TEMP_DIR="temp"
 BIN_DIR="bin"
 BUILD_DIR="build"
-DL_SRCS=("direct" "apkmirror" "uptodown")
+DL_SRCS=("direct" "apkmirror" "uptodown" "aptoide")
 KS_PASS="${KEYSTORE_PASSWORD-}"
 
 if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
@@ -465,6 +465,28 @@ get_apkmirror_resp() {
 	local url="${1%/}"
 	__APKMIRROR_RESP__=$(req "$url/" -) || return 1
 	__APKMIRROR_CAT__="${url##*/}"
+}
+
+# -------------------- aptoide --------------------
+get_aptoide_resp() {
+	local pkg_name=$1
+	__APTOIDE_RESP__=$(req "https://ws75.aptoide.com/api/7/app/getMeta?package_name=${pkg_name}" -) || return 1
+	__APTOIDE_PKG__="$pkg_name"
+}
+get_aptoide_pkg_name() {
+	echo "$__APTOIDE_PKG__"
+}
+get_aptoide_vers() {
+	jq -r '.data.file.vername' <<<"$__APTOIDE_RESP__"
+}
+dl_aptoide() {
+	local pkg_name=$1 version=$2 output=$3 arch=$4 dpi=$5
+	local url
+	url=$(jq -r '.data.file.path' <<<"$__APTOIDE_RESP__")
+	if [ -z "$url" ] || [ "$url" = "null" ]; then
+		return 1
+	fi
+	req "$url" "$output"
 }
 
 # -------------------- uptodown --------------------

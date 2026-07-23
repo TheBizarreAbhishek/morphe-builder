@@ -59,6 +59,7 @@ cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Piko"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/x-corp/x/"
 uptodown-dlurl = "https://twitter.en.uptodown.com/android"
+aptoide-dlurl = "com.twitter.android"
 build-mode = "module"
 include-stock = "split"
 
@@ -70,6 +71,7 @@ build-mode = "both"
 arch = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
 uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
+aptoide-dlurl = "com.google.android.apps.photos"
 
 [Twitch]
 enabled = false
@@ -83,6 +85,7 @@ rv-brand = "Piko"
 build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/instagram-instagram/"
 uptodown-dlurl = "https://instagram.en.uptodown.com/android"
+aptoide-dlurl = "com.instagram.android"
 
 [YouTube-Anddea]
 app-name = "YouTube"

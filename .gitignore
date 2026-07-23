@@ -1,0 +1,11 @@
+*.apk
+*.zip
+/temp
+/build
+test*
+/logs
+build.md
+cmpr
+*-temporary-files
+*.keystore
+*.pem

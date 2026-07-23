@@ -5,7 +5,7 @@ CWD=$(pwd)
 TEMP_DIR="temp"
 BIN_DIR="bin"
 BUILD_DIR="build"
-DL_SRCS=("direct" "apkmirror" "uptodown" "aptoide")
+DL_SRCS=("direct" "apkmirror" "uptodown" "aptoide" "apkpure")
 KS_PASS="${KEYSTORE_PASSWORD-}"
 
 if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
@@ -312,11 +312,13 @@ get_patch_last_supported_ver() {
 
 patches_list_versions() {
 	local cli_jar=$1 patches_jar=$2 pkg_name=$3 op cmd
-	local cmd_base="java -jar '$cli_jar' list-versions"
-
-	# TODO: remove this later
 	local cli_name
 	cli_name=$(basename "$cli_jar")
+	if [ "${cli_name::6}" = "morphe" ]; then
+		echo "Any"
+		return 0
+	fi
+	local cmd_base="java -jar '$cli_jar' list-versions"
 	if [ "${cli_name::8}" = revanced ]; then cmd_base+=" -b"; fi
 
 	cmd="${cmd_base} --patches='$patches_jar' -f '$pkg_name'"
@@ -484,6 +486,43 @@ dl_aptoide() {
 	local url
 	url=$(jq -r '.data.file.path' <<<"$__APTOIDE_RESP__")
 	if [ -z "$url" ] || [ "$url" = "null" ]; then
+		return 1
+	fi
+	req "$url" "$output"
+}
+
+# -------------------- apkpure --------------------
+get_apkpure_resp() {
+	local pkg_name=$1
+	__APKPURE_RESP__=$(req "https://api.pureapk.com/m/v3/cms/app_version?hl=en-US&package_name=${pkg_name}" - -H "x-sv: 29" -H "x-abis: arm64-v8a,armeabi-v7a,armeabi" -H "x-gp: 1") || return 1
+	__APKPURE_PKG__="$pkg_name"
+}
+get_apkpure_pkg_name() {
+	echo "$__APKPURE_PKG__"
+}
+get_apkpure_vers() {
+	local url
+	url=$(strings <<<"$__APKPURE_RESP__" | grep -o -E "https://download.pureapk.com/b/APK/[^\"]*" | head -n 1)
+	if [ -z "$url" ]; then
+		return 1
+	fi
+	local c_param
+	c_param=$(echo "$url" | grep -o -E "c=[^&]+")
+	c_param=${c_param#c=}
+	c_param=$(echo "$c_param" | sed 's/%7C/|/g; s/%2F/\//g; s/%2B/+/g; s/%3D/=/g')
+	local b64
+	b64=${c_param##*|}
+	if [ "$b64" ]; then
+		local padlen=$(( (4 - (${#b64} % 4)) % 4 ))
+		if [ $padlen -eq 1 ]; then b64+="="; elif [ $padlen -eq 2 ]; then b64+="=="; fi
+		echo "$b64" | base64 -d 2>/dev/null | grep -o -E "vn=[0-9.]+" | cut -d= -f2
+	fi
+}
+dl_apkpure() {
+	local pkg_name=$1 version=$2 output=$3 arch=$4 dpi=$5
+	local url
+	url=$(strings <<<"$__APKPURE_RESP__" | grep -o -E "https://download.pureapk.com/b/APK/[^\"]*" | head -n 1)
+	if [ -z "$url" ]; then
 		return 1
 	fi
 	req "$url" "$output"
@@ -670,6 +709,12 @@ build_rv() {
 		return 0
 	fi
 	pr "Package name of '${table}' is '$pkg_name'"
+	if [ -z "${args[aptoide_dlurl]}" ]; then
+		args[aptoide_dlurl]="$pkg_name"
+	fi
+	if [ -z "${args[apkpure_dlurl]}" ]; then
+		args[apkpure_dlurl]="$pkg_name"
+	fi
 	local list_patches
 	list_patches=$(patches_list "$cli_jar" "$patches_jar" "$pkg_name") || return 1
 	local get_latest_ver=false

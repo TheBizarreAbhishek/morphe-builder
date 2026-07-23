@@ -1,3 +1,4 @@
+Instagram: 435.0.0.37.76  
 Music-Anddea (arm64-v8a): 9.15.51  
 Music-Anddea (arm-v7a): 9.15.51  
 Music-Morphe (arm64-v8a): 9.15.51  

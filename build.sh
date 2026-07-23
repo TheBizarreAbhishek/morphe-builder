@@ -7,7 +7,15 @@ source utils.sh
 
 trap "abort" INT
 
-if [ -z "${KEYSTORE_PASSWORD-}" ] && [ "${1-}" != "clean" ]; then
+is_config_update=false
+for arg in "$@"; do
+	if [ "$arg" = "--config-update" ]; then
+		is_config_update=true
+		break
+	fi
+done
+
+if [ -z "${KEYSTORE_PASSWORD-}" ] && [ "${1-}" != "clean" ] && [ "$is_config_update" != "true" ]; then
 	abort "ERROR: 'KEYSTORE_PASSWORD' environment variable is not set. Please set it before running the build."
 fi
 

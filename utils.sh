@@ -314,20 +314,21 @@ patches_list_versions() {
 	local cli_jar=$1 patches_jar=$2 pkg_name=$3 op cmd
 	local cli_name
 	cli_name=$(basename "$cli_jar")
-	if [ "${cli_name::6}" = "morphe" ]; then
-		echo "Any"
-		return 0
-	fi
 	local cmd_base="java -jar '$cli_jar' list-versions"
-	if [ "${cli_name::8}" = revanced ]; then cmd_base+=" -b"; fi
+	local filter_arg="-f"
+	if [ "${cli_name::6}" = "morphe" ]; then
+		filter_arg="--filter-package-names"
+	elif [ "${cli_name::8}" = revanced ]; then
+		cmd_base+=" -b"
+	fi
 
-	cmd="${cmd_base} --patches='$patches_jar' -f '$pkg_name'"
+	cmd="${cmd_base} --patches='$patches_jar' $filter_arg '$pkg_name'"
 	if op=$(eval "$cmd" 2>&1); then
 		echo "$op"
 		return
 	fi
 
-	cmd="${cmd_base} '$patches_jar' -f '$pkg_name'"
+	cmd="${cmd_base} '$patches_jar' $filter_arg '$pkg_name'"
 	if op=$(eval "$cmd" 2>&1); then
 		echo "$op"
 		return

@@ -4,12 +4,15 @@ MODDIR=${0%/*}
 
 detach_playstore() {
 	if command -v sqlite3 >/dev/null 2>&1; then
+		am force-stop com.android.vending
 		if [ -f "/data/data/com.android.vending/databases/localappstate.db" ]; then
 			sqlite3 /data/data/com.android.vending/databases/localappstate.db "DELETE FROM package_state WHERE package_name = '$PKG_NAME';" >/dev/null 2>&1
 		fi
 		if [ -f "/data/data/com.android.vending/databases/library.db" ]; then
+			sqlite3 /data/data/com.android.vending/databases/library.db "DELETE FROM ownership WHERE doc_id = '$PKG_NAME';" >/dev/null 2>&1
 			sqlite3 /data/data/com.android.vending/databases/library.db "DELETE FROM ownership WHERE package_name = '$PKG_NAME';" >/dev/null 2>&1
 		fi
+		am force-stop com.android.vending
 	fi
 }
 

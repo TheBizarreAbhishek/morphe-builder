@@ -23,8 +23,8 @@ jobs:
           git remote add upstream https://github.com/j-hc/revanced-magisk-module.git || true
           git fetch upstream main
           
-          # Merge upstream/main with ours strategy for conflicts to preserve our customized files
-          if ! git merge upstream/main -m "Sync upstream changes" --allow-unrelated-histories -X ours; then
+          # Merge FETCH_HEAD (which is upstream's main branch) with ours strategy
+          if ! git merge FETCH_HEAD -m "Sync upstream changes" --allow-unrelated-histories -X ours; then
             echo "::warning::Merge had conflicts that could not be resolved automatically."
             exit 1
           fi

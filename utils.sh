@@ -776,6 +776,9 @@ check_sig() {
 
 build_rv() {
 	eval "declare -A args=${1#*=}"
+	if [ -n "${args[uptodown_dlurl]}" ]; then
+		args[uptodown_dlurl]="${args[uptodown_dlurl]//.en./.}"
+	fi
 	local version="" pkg_name=""
 	local mode_arg=${args[build_mode]} version_mode=${args[version]}
 	local app_name=${args[app_name]}

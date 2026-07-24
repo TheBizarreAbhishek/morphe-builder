@@ -115,3 +115,13 @@ excluded-patches = """\
   """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
 uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
+
+[Truecaller]
+patches-source = "binarymend/morphe-patches"
+cli-source = "MorpheApp/morphe-cli"
+rv-brand = "Binarymend"
+build-mode = "both"
+arch = "both"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/truecaller/truecaller/"
+uptodown-dlurl = "https://truecaller.en.uptodown.com/android"
+aptoide-dlurl = "com.truecaller"

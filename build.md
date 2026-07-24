@@ -1,15 +1,12 @@
 GooglePhotos (arm64-v8a): 7.85.0.952162352  
 GooglePhotos (arm-v7a): 7.85.0.952162352  
-Instagram: 435.0.0.37.76  
-Music-Anddea (arm64-v8a): 9.15.51  
-Music-Anddea (arm-v7a): 9.15.51  
+Music-Anddea (arm64-v8a): 9.29.53  
+Music-Anddea (arm-v7a): 9.29.53  
 Music-Morphe (arm64-v8a): 9.15.51  
 Music-Morphe (arm-v7a): 9.15.51  
 Reddit-Morphe: 2026.14.0  
-Truecaller (arm64-v8a): 15.28.7  
-Truecaller (arm-v7a): 15.28.7  
 Twitter: 12.2.0-release.0  
-YouTube-Anddea: 20.51.39  
+YouTube-Anddea: 21.28.205  
 YouTube-Morphe: 21.04.223  
 
 Install [Microg](https://github.com/ReVanced/GmsCore/releases) for non-root YouTube and YT Music APKs  
@@ -19,6 +16,7 @@ Install [Microg](https://github.com/ReVanced/GmsCore/releases) for non-root YouT
 Patches: anddea/patches-4.2.0-dev.7.mpp  
 [Changelog](https://github.com/anddea/revanced-patches/releases/tag/v4.2.0-dev.7)
 
+CLI: ReVanced/revanced-cli-6.0.0-all.jar  
 Patches: binarymend/patches-1.3.1.mpp  
 [Changelog](https://github.com/binarymend/morphe-patches/releases/tag/v1.3.1)
 

@@ -280,22 +280,52 @@ semver_validate() {
 filter_beta_versions() {
 	local pkg_name=$1
 	local ver
+	local compatible_vers
+	compatible_vers=$(tee)
+
+	# Fetch stable versions list from Uptodown
+	local stable_vers=""
+	if [ -n "${args[uptodown_dlurl]}" ]; then
+		local resp
+		if resp=$(req "${args[uptodown_dlurl]}/versions" -); then
+			stable_vers=$($HTMLQ --text ".version" <<<"$resp")
+		fi
+	fi
+
+	# If stable versions list was retrieved successfully, filter the list!
+	if [ -n "$stable_vers" ]; then
+		local found=false
+		while read -r ver; do
+			if [ -z "$ver" ]; then continue; fi
+			# General filters (like beta/alpha/dev/rc/pre)
+			if echo "$ver" | grep -q -i -E "beta|alpha|dev|rc|pre"; then
+				continue
+			fi
+			# Check if ver exists in Uptodown stable list
+			if echo "$stable_vers" | grep -q -w -F "$ver"; then
+				echo "$ver"
+				found=true
+			fi
+		done <<<"$compatible_vers"
+		if [ "$found" = true ]; then
+			return
+		fi
+	fi
+
+	# Fallback if Uptodown list is empty or matches nothing
 	while read -r ver; do
 		if [ -z "$ver" ]; then continue; fi
-		# General checks
 		if echo "$ver" | grep -q -i -E "beta|alpha|dev|rc|pre"; then
 			continue
 		fi
-		# Package-specific checks
+		# Custom package-specific beta rules
 		if [ "$pkg_name" = "com.instagram.android" ]; then
-			# Instagram beta/alpha builds have 36, 37, 38 as 4th field
 			local field4
 			field4=$(cut -d. -f4 <<<"$ver")
 			if [ "$field4" = "36" ] || [ "$field4" = "37" ] || [ "$field4" = "38" ]; then
 				continue
 			fi
 		elif [ "$pkg_name" = "com.google.android.youtube" ]; then
-			# YouTube major version 21+ is beta/alpha currently
 			local major
 			major=$(cut -d. -f1 <<<"$ver")
 			if [ "$major" -ge 21 ]; then
@@ -303,7 +333,7 @@ filter_beta_versions() {
 			fi
 		fi
 		echo "$ver"
-	done
+	done <<<"$compatible_vers"
 }
 get_patch_last_supported_ver() {
 	local list_patches=$1 pkg_name=$2 inc_sel=$3 _exc_sel=$4 _exclusive=$5 # TODO: resolve using all of these

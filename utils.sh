@@ -737,8 +737,19 @@ build_rv() {
 	fi
 	if [ $get_latest_ver = true ]; then
 		if [ "$version_mode" = beta ]; then __AAV__="true"; else __AAV__="false"; fi
-		pkgvers=$(get_"${dl_from}"_vers)
-		version=$(get_highest_ver <<<"$pkgvers") || version=$(head -1 <<<"$pkgvers")
+		for dl_p in "$dl_from" "${DL_SRCS[@]}"; do
+			if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
+			if [ "$dl_p" != "$dl_from" ]; then
+				if ! get_${dl_p}_resp "${args[${dl_p}_dlurl]}"; then continue; fi
+			fi
+			if pkgvers=$(get_"${dl_p}"_vers) && [ "$pkgvers" ]; then
+				version=$(get_highest_ver <<<"$pkgvers") || version=$(head -1 <<<"$pkgvers")
+				if [ "$version" ]; then
+					dl_from=$dl_p
+					break
+				fi
+			fi
+		done
 	fi
 	if [ -z "$version" ]; then
 		epr "empty version, not building ${table}."

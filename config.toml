@@ -71,7 +71,7 @@ cli-source = "MorpheApp/morphe-cli"
 rv-brand = "De-Vanced"
 build-mode = "both"
 arch = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/google-photos/"
 uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
 aptoide-dlurl = "com.google.android.apps.photos"
 

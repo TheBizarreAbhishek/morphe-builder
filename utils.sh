@@ -277,6 +277,34 @@ semver_validate() {
 	local ac="${a//[.0-9]/}"
 	[ ${#ac} = 0 ]
 }
+filter_beta_versions() {
+	local pkg_name=$1
+	local ver
+	while read -r ver; do
+		if [ -z "$ver" ]; then continue; fi
+		# General checks
+		if echo "$ver" | grep -q -i -E "beta|alpha|dev|rc|pre"; then
+			continue
+		fi
+		# Package-specific checks
+		if [ "$pkg_name" = "com.instagram.android" ]; then
+			# Instagram beta/alpha builds have 36, 37, 38 as 4th field
+			local field4
+			field4=$(cut -d. -f4 <<<"$ver")
+			if [ "$field4" = "36" ] || [ "$field4" = "37" ] || [ "$field4" = "38" ]; then
+				continue
+			fi
+		elif [ "$pkg_name" = "com.google.android.youtube" ]; then
+			# YouTube major version 21+ is beta/alpha currently
+			local major
+			major=$(cut -d. -f1 <<<"$ver")
+			if [ "$major" -ge 21 ]; then
+				continue
+			fi
+		fi
+		echo "$ver"
+	done
+}
 get_patch_last_supported_ver() {
 	local list_patches=$1 pkg_name=$2 inc_sel=$3 _exc_sel=$4 _exclusive=$5 # TODO: resolve using all of these
 	local op
@@ -293,7 +321,7 @@ get_patch_last_supported_ver() {
 		done <<<"$(list_args "$inc_sel")"
 		vers=$(awk '{$1=$1}1' <<<"$vers")
 		if [ "$vers" ]; then
-			get_highest_ver <<<"$vers"
+			filter_beta_versions "$pkg_name" <<<"$vers" | get_highest_ver
 			return
 		fi
 	fi
@@ -310,7 +338,7 @@ get_patch_last_supported_ver() {
 	if [ -z "$pcount" ]; then
 		abort "No patches found for '$pkg_name' in patches '$patches_jar'"
 	fi
-	grep -F "($pcount patch" <<<"$op" | sed 's/ (.* patch.*//' | get_highest_ver || return 1
+	grep -F "($pcount patch" <<<"$op" | sed 's/ (.* patch.*//' | filter_beta_versions "$pkg_name" | get_highest_ver || return 1
 }
 
 patches_list_versions() {
@@ -658,12 +686,42 @@ patch_apk() {
 	local tmp_files
 	tmp_files="$(pwd)/$(mktemp -d -p "$TEMP_DIR")"
 
-	local cmd="java -jar '$cli_jar' patch '$stock_input' -o '$patched_apk' -p '$patches_jar' --keystore=ks.keystore \
---keystore-entry-password='${KS_PASS}' --keystore-password='${KS_PASS}' --signer=abhishek --keystore-entry-alias=abhishek -t '$tmp_files' $patcher_args"
-
-	# TODO: remove this later
+	local ks_file="ks.keystore"
 	local cli_name
 	cli_name=$(basename "$cli_jar")
+	if [ "${cli_name::8}" = revanced ]; then
+		# Convert ks.keystore to BKS format for ReVanced CLI
+		if [ -f "ks.keystore" ] && [ ! -f "ks.bks" ]; then
+			pr "Converting PKCS12 keystore to BKS format for ReVanced CLI..."
+			if ! keytool -importkeystore \
+				-srckeystore ks.keystore \
+				-srcstoretype PKCS12 \
+				-srcstorepass "${KS_PASS}" \
+				-destkeystore ks.bks \
+				-deststoretype BKS \
+				-deststorepass "${KS_PASS}" \
+				-providerclass org.bouncycastle.jce.provider.BouncyCastleProvider \
+				-providerpath "$cli_jar" >/dev/null 2>&1; then
+				# Fallback if source type is JKS instead of PKCS12
+				keytool -importkeystore \
+					-srckeystore ks.keystore \
+					-srcstoretype JKS \
+					-srcstorepass "${KS_PASS}" \
+					-destkeystore ks.bks \
+					-deststoretype BKS \
+					-deststorepass "${KS_PASS}" \
+					-providerclass org.bouncycastle.jce.provider.BouncyCastleProvider \
+					-providerpath "$cli_jar" >/dev/null 2>&1
+			fi
+		fi
+		if [ -f "ks.bks" ]; then
+			ks_file="ks.bks"
+		fi
+	fi
+
+	local cmd="java -jar '$cli_jar' patch '$stock_input' -o '$patched_apk' -p '$patches_jar' --keystore=$ks_file \
+--keystore-entry-password='${KS_PASS}' --keystore-password='${KS_PASS}' --signer=abhishek --keystore-entry-alias=abhishek -t '$tmp_files' $patcher_args"
+
 	if [ "${cli_name::8}" = revanced ]; then cmd+=" -b"; fi
 
 	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary='${AAPT2}'"; fi

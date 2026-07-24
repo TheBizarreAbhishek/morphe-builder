@@ -6,6 +6,8 @@ Music-Anddea (arm-v7a): 9.15.51
 Music-Morphe (arm64-v8a): 9.15.51  
 Music-Morphe (arm-v7a): 9.15.51  
 Reddit-Morphe: 2026.14.0  
+Truecaller (arm64-v8a): 15.28.7  
+Truecaller (arm-v7a): 15.28.7  
 Twitter: 12.2.0-release.0  
 YouTube-Anddea: 20.51.39  
 YouTube-Morphe: 21.04.223  

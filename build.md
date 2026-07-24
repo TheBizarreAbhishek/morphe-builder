@@ -4,8 +4,6 @@ Music-Anddea (arm64-v8a): 9.29.53
 Music-Anddea (arm-v7a): 9.29.53  
 Music-Morphe (arm64-v8a): 9.15.51  
 Music-Morphe (arm-v7a): 9.15.51  
-Reddit-Morphe: 2026.14.0  
-Twitter: 12.2.0-release.0  
 YouTube-Anddea: 21.28.205  
 YouTube-Morphe: 20.51.39  
 

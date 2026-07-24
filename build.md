@@ -7,7 +7,7 @@ Music-Morphe (arm-v7a): 9.15.51
 Reddit-Morphe: 2026.14.0  
 Twitter: 12.2.0-release.0  
 YouTube-Anddea: 21.28.205  
-YouTube-Morphe: 21.04.223  
+YouTube-Morphe: 20.51.39  
 
 Install [Microg](https://github.com/ReVanced/GmsCore/releases) for non-root YouTube and YT Music APKs  
 

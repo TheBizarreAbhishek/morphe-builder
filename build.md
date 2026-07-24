@@ -17,6 +17,9 @@ Install [Microg](https://github.com/ReVanced/GmsCore/releases) for non-root YouT
 Patches: anddea/patches-4.2.0-dev.7.mpp  
 [Changelog](https://github.com/anddea/revanced-patches/releases/tag/v4.2.0-dev.7)
 
+Patches: binarymend/patches-1.3.1.mpp  
+[Changelog](https://github.com/binarymend/morphe-patches/releases/tag/v1.3.1)
+
 Patches: crimera/patches-3.7.0.mpp  
 [Changelog](https://github.com/crimera/piko/releases/tag/v3.7.0)
 

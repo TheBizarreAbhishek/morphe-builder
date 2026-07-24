@@ -1,3 +1,5 @@
+GooglePhotos (arm64-v8a): 7.85.0.952162352  
+GooglePhotos (arm-v7a): 7.85.0.952162352  
 Instagram: 435.0.0.37.76  
 Music-Anddea (arm64-v8a): 9.15.51  
 Music-Anddea (arm-v7a): 9.15.51  

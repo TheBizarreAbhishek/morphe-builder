@@ -293,7 +293,7 @@ get_patch_last_supported_ver() {
 		done <<<"$(list_args "$inc_sel")"
 		vers=$(awk '{$1=$1}1' <<<"$vers")
 		if [ "$vers" ]; then
-			sort -s -t- -k1,1Vr <<<"$vers"
+			get_highest_ver <<<"$vers"
 			return
 		fi
 	fi
@@ -310,7 +310,7 @@ get_patch_last_supported_ver() {
 	if [ -z "$pcount" ]; then
 		abort "No patches found for '$pkg_name' in patches '$patches_jar'"
 	fi
-	grep -F "($pcount patch" <<<"$op" | sed 's/ (.* patch.*//' | sort -s -t- -k1,1Vr || return 1
+	grep -F "($pcount patch" <<<"$op" | sed 's/ (.* patch.*//' | get_highest_ver || return 1
 }
 
 patches_list_versions() {
@@ -735,16 +735,16 @@ build_rv() {
 	list_patches=$(patches_list "$cli_jar" "$patches_jar" "$pkg_name") || return 1
 	local get_latest_ver=false
 	if [ "$version_mode" = auto ]; then
-		if ! versions=$(get_patch_last_supported_ver "$list_patches" "$pkg_name" \
+		if ! version=$(get_patch_last_supported_ver "$list_patches" "$pkg_name" \
 			"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}"); then
 			epr "get_patch_last_supported_ver failed '$list_patches'"
 			return
-		elif [ -z "$versions" ]; then get_latest_ver=true; fi
+		elif [ -z "$version" ]; then get_latest_ver=true; fi
 	elif isoneof "$version_mode" latest beta; then
 		get_latest_ver=true
 		p_patcher_args+=("-f")
 	else
-		versions=$version_mode
+		version=$version_mode
 		p_patcher_args+=("-f")
 	fi
 	if [ $get_latest_ver = true ]; then
@@ -762,9 +762,8 @@ build_rv() {
 				fi
 			fi
 		done
-		versions=$version
 	fi
-	if [ -z "$versions" ]; then
+	if [ -z "$version" ]; then
 		epr "empty version, not building ${table}."
 		return 0
 	fi
@@ -777,37 +776,27 @@ build_rv() {
 		build_mode_arr=(apk module)
 	fi
 
-	local got_apk=false
-	local stock_apk=""
-	# Loop through each resolved compatible version
-	for ver_try in $versions; do
-		local ver_try_f=${ver_try// /}
-		ver_try_f=${ver_try_f#v}
-		stock_apk="${TEMP_DIR}/${pkg_name}-${ver_try_f}-${arch_f}.apk"
-		if [ -f "$stock_apk" ]; then
-			version=$ver_try
-			got_apk=true
-			break
-		fi
+	local version_f=${version// /}
+	version_f=${version_f#v}
+	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}.apk"
+	if [ ! -f "$stock_apk" ]; then
 		for dl_p in "${DL_SRCS[@]}"; do
 			if [ -z "${args[${dl_p}_dlurl]}" ]; then continue; fi
-			pr "Downloading '${table}' from '${dl_p}' with version '${ver_try}'"
+			pr "Downloading '${table}' from '${dl_p}' with version '${version}'"
 			if ! isoneof $dl_p "${tried_dl[@]}"; then
 				if ! get_${dl_p}_resp "${args[${dl_p}_dlurl]}"; then
 					epr "ERROR: Could not get '${table}' from '${dl_p}'"
 					continue
 				fi
 			fi
-			if dl_${dl_p} "${args[${dl_p}_dlurl]}" "$ver_try" "$stock_apk" "$arch" "${args[dpi]}" "$get_latest_ver"; then
-				version=$ver_try
-				got_apk=true
-				break 2
+			if dl_${dl_p} "${args[${dl_p}_dlurl]}" "$version" "$stock_apk" "$arch" "${args[dpi]}" "$get_latest_ver"; then
+				break
 			fi
 		done
-	done
-	if [ "$got_apk" = false ]; then
-		epr "Stock apk not found for any compatible version"
-		return 0
+		if [ ! -f "$stock_apk" ]; then
+			epr "Stock apk not found for version $version"
+			return 0
+		fi
 	fi
 
 	pr "Choosing version '${version}' for ${table}"

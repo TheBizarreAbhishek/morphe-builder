@@ -328,7 +328,7 @@ filter_beta_versions() {
 		elif [ "$pkg_name" = "com.google.android.youtube" ]; then
 			local major
 			major=$(cut -d. -f1 <<<"$ver")
-			if [ "$major" -ge 21 ]; then
+			if [ "$major" -ge 22 ]; then
 				continue
 			fi
 		fi

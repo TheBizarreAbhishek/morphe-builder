@@ -93,9 +93,13 @@ aptoide-dlurl = "com.instagram.android"
 app-name = "YouTube"
 patches-source = "anddea/revanced-patches"
 patches-version = "dev"
-cli-source = "MorpheApp/morphe-cli"
+cli-source = "ReVanced/revanced-cli"
 rv-brand = "Anddea"
 build-mode = "both"
+excluded-patches = """\
+  'Custom branding icon' \
+  'Custom branding name' \
+  """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 
@@ -103,10 +107,14 @@ uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 app-name = "Music"
 patches-source = "anddea/revanced-patches"
 patches-version = "dev"
-cli-source = "MorpheApp/morphe-cli"
+cli-source = "ReVanced/revanced-cli"
 rv-brand = "Anddea"
 build-mode = "both"
 arch = "both"
+excluded-patches = """\
+  'Custom branding icon' \
+  'Custom branding name' \
+  """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
 uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 

@@ -572,8 +572,8 @@ get_uptodown_resp() {
 get_uptodown_vers() { $HTMLQ --text ".version" <<<"$__UPTODOWN_RESP__"; }
 dl_uptodown() {
 	local uptodown_dlurl=$1 version=$2 output=$3 arch=$4 _dpi=$5
-	# Uptodown redirects static browser downloads of Twitter/Instagram to the Uptodown App Store client
-	if [ "$pkg_name" = "com.twitter.android" ] || [ "$pkg_name" = "com.instagram.android" ]; then
+	# Uptodown redirects static browser downloads of Twitter to the Uptodown App Store client
+	if [ "$pkg_name" = "com.twitter.android" ]; then
 		return 1
 	fi
 	if [ "$arch" = "arm-v7a" ]; then arch="armeabi-v7a"; fi

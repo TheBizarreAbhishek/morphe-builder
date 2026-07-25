@@ -318,20 +318,6 @@ filter_beta_versions() {
 		if echo "$ver" | grep -q -i -E "beta|alpha|dev|rc|pre"; then
 			continue
 		fi
-		# Custom package-specific beta rules
-		if [ "$pkg_name" = "com.instagram.android" ]; then
-			local field4
-			field4=$(cut -d. -f4 <<<"$ver")
-			if [ "$field4" = "36" ] || [ "$field4" = "37" ] || [ "$field4" = "38" ]; then
-				continue
-			fi
-		elif [ "$pkg_name" = "com.google.android.youtube" ]; then
-			local major
-			major=$(cut -d. -f1 <<<"$ver")
-			if [ "$major" -ge 22 ]; then
-				continue
-			fi
-		fi
 		echo "$ver"
 	done <<<"$compatible_vers"
 }

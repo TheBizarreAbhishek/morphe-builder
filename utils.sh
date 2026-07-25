@@ -633,7 +633,14 @@ dl_uptodown() {
 		req "https://dw.uptodown.com/dwn/${data_url}" "$output"
 	fi
 }
-get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)" <<<"$__UPTODOWN_RESP_PKG__"; }
+get_uptodown_pkg_name() {
+	local pkg
+	pkg=$(grep -o -E "details\?id=[a-zA-Z0-9._]+" <<<"$__UPTODOWN_RESP_PKG__" | cut -d= -f2 | head -n 1)
+	if [ -z "$pkg" ]; then
+		pkg=$(grep -o -E "details\?id=[a-zA-Z0-9._]+" <<<"$__UPTODOWN_RESP__" | cut -d= -f2 | head -n 1)
+	fi
+	echo "$pkg"
+}
 
 # -------------------- archive --------------------
 dl_archive() {

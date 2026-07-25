@@ -278,16 +278,16 @@ semver_validate() {
 	[ ${#ac} = 0 ]
 }
 filter_beta_versions() {
-	local pkg_name=$1
+	local pkg_name=$1 uptodown_url=${2-}
 	local ver
 	local compatible_vers
 	compatible_vers=$(tee)
 
 	# Fetch stable versions list from Uptodown
 	local stable_vers=""
-	if [ -n "${args[uptodown_dlurl]}" ]; then
+	if [ -n "$uptodown_url" ]; then
 		local resp
-		if resp=$(req "${args[uptodown_dlurl]}/versions" -); then
+		if resp=$(req "${uptodown_url}/versions" -); then
 			stable_vers=$($HTMLQ --text ".version" <<<"$resp")
 		fi
 	fi
@@ -336,7 +336,7 @@ filter_beta_versions() {
 	done <<<"$compatible_vers"
 }
 get_patch_last_supported_ver() {
-	local list_patches=$1 pkg_name=$2 inc_sel=$3 _exc_sel=$4 _exclusive=$5 # TODO: resolve using all of these
+	local list_patches=$1 pkg_name=$2 inc_sel=$3 _exc_sel=$4 _exclusive=$5 uptodown_url=${6-}
 	local op
 	if [ "$inc_sel" ]; then
 		if ! op=$(awk '{$1=$1}1' <<<"$list_patches"); then
@@ -351,7 +351,7 @@ get_patch_last_supported_ver() {
 		done <<<"$(list_args "$inc_sel")"
 		vers=$(awk '{$1=$1}1' <<<"$vers")
 		if [ "$vers" ]; then
-			filter_beta_versions "$pkg_name" <<<"$vers" | get_highest_ver
+			filter_beta_versions "$pkg_name" "$uptodown_url" <<<"$vers" | get_highest_ver
 			return
 		fi
 	fi
@@ -368,7 +368,7 @@ get_patch_last_supported_ver() {
 	if [ -z "$pcount" ]; then
 		abort "No patches found for '$pkg_name' in patches '$patches_jar'"
 	fi
-	grep -F "($pcount patch" <<<"$op" | sed 's/ (.* patch.*//' | filter_beta_versions "$pkg_name" | get_highest_ver || return 1
+	grep -F "($pcount patch" <<<"$op" | sed 's/ (.* patch.*//' | filter_beta_versions "$pkg_name" "$uptodown_url" | get_highest_ver || return 1
 }
 
 patches_list_versions() {
@@ -570,7 +570,7 @@ get_apkpure_pkg_name() {
 }
 get_apkpure_vers() {
 	local url
-	url=$(strings <<<"$__APKPURE_RESP__" | grep -o -E "https://download.pureapk.com/b/APK/[^\"]*" | head -n 1)
+	url=$(strings <<<"$__APKPURE_RESP__" | grep -o -E "https://download.pureapk.com/b/[A-Z]+/[^\"]*" | head -n 1)
 	if [ -z "$url" ]; then
 		return 1
 	fi
@@ -586,17 +586,37 @@ get_apkpure_vers() {
 		echo "$b64" | base64 -d 2>/dev/null | grep -o -E "vn=[0-9.]+" | cut -d= -f2
 	fi
 }
+get_apkpure_url_for_version() {
+	local version=$1
+	local url
+	local urls
+	urls=$(strings <<<"$__APKPURE_RESP__" | grep -o -E "https://download.pureapk.com/b/[A-Z]+/[^\"]*")
+	while read -r url; do
+		if [ -z "$url" ]; then continue; fi
+		local c_param
+		c_param=$(echo "$url" | grep -o -E "c=[^&]+") || continue
+		c_param=${c_param#c=}
+		c_param=$(echo "$c_param" | sed 's/%7C/|/g; s/%2F/\//g; s/%2B/+/g; s/%3D/=/g')
+		local b64
+		b64=${c_param##*|}
+		if [ "$b64" ]; then
+			local padlen=$(( (4 - (${#b64} % 4)) % 4 ))
+			if [ $padlen -eq 1 ]; then b64+="="; elif [ $padlen -eq 2 ]; then b64+="=="; fi
+			local parsed_ver
+			parsed_ver=$(echo "$b64" | base64 -d 2>/dev/null | grep -o -E "vn=[0-9a-zA-Z.-]+" | cut -d= -f2)
+			if [ "${parsed_ver// /}" = "${version// /}" ]; then
+				echo "$url"
+				return 0
+			fi
+		fi
+	done <<<"$urls"
+	return 1
+}
 dl_apkpure() {
 	local pkg_name=$1 version=$2 output=$3 arch=$4 dpi=$5
-	local latest_ver
-	latest_ver=$(get_apkpure_vers)
-	if [ "${version// /}" != "${latest_ver// /}" ]; then
-		epr "APKPure version mismatch: requested $version, latest is $latest_ver"
-		return 1
-	fi
 	local url
-	url=$(strings <<<"$__APKPURE_RESP__" | grep -o -E "https://download.pureapk.com/b/APK/[^\"]*" | head -n 1)
-	if [ -z "$url" ]; then
+	if ! url=$(get_apkpure_url_for_version "$version"); then
+		epr "APKPure: requested version $version not found in response"
 		return 1
 	fi
 	req "$url" "$output"
@@ -610,6 +630,10 @@ get_uptodown_resp() {
 get_uptodown_vers() { $HTMLQ --text ".version" <<<"$__UPTODOWN_RESP__"; }
 dl_uptodown() {
 	local uptodown_dlurl=$1 version=$2 output=$3 arch=$4 _dpi=$5
+	# Uptodown redirects static browser downloads of Twitter/Instagram to the Uptodown App Store client
+	if [ "$pkg_name" = "com.twitter.android" ] || [ "$pkg_name" = "com.instagram.android" ]; then
+		return 1
+	fi
 	if [ "$arch" = "arm-v7a" ]; then arch="armeabi-v7a"; fi
 
 	local apparch=('arm64-v8a, armeabi-v7a, x86_64' 'arm64-v8a, armeabi-v7a, x86, x86_64' 'arm64-v8a, armeabi-v7a')
@@ -827,7 +851,7 @@ build_rv() {
 	local get_latest_ver=false
 	if [ "$version_mode" = auto ]; then
 		if ! version=$(get_patch_last_supported_ver "$list_patches" "$pkg_name" \
-			"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}"); then
+			"${args[included_patches]}" "${args[excluded_patches]}" "${args[exclusive_patches]}" "${args[uptodown_dlurl]-}"); then
 			epr "get_patch_last_supported_ver failed '$list_patches'"
 			return
 		elif [ -z "$version" ]; then get_latest_ver=true; fi

@@ -1,5 +1,3 @@
-GooglePhotos (arm64-v8a): 7.85.0.952162352  
-GooglePhotos (arm-v7a): 7.85.0.952162352  
 YouTube-Anddea: 20.51.39  
 YouTube-Morphe: 21.04.223  
 

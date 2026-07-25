@@ -1,3 +1,7 @@
+Music-Anddea (arm64-v8a): 9.15.51  
+Music-Anddea (arm-v7a): 9.15.51  
+Music-Morphe (arm64-v8a): 9.15.51  
+Music-Morphe (arm-v7a): 9.15.51  
 YouTube-Anddea: 20.51.39  
 YouTube-Morphe: 21.04.223  
 

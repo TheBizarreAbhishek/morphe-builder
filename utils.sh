@@ -730,7 +730,7 @@ patch_apk() {
 	if [ "${cli_name::8}" = revanced ] && [[ "$patches_jar" == *.mpp ]]; then
 		local morphe_cli
 		morphe_cli=$(find temp -name "morphe-desktop-*.jar" | head -n 1)
-		cmd="java -cp '$cli_jar:$morphe_cli' app.revanced.cli.main.Main patch '$stock_input' -o '$patched_apk' -p '$patches_jar' --keystore=$ks_file --keystore-entry-password='${KS_PASS}' --keystore-password='${KS_PASS}' --signer=abhishek --keystore-entry-alias=abhishek -t '$tmp_files' $patcher_args"
+		cmd="java -cp '$cli_jar:$morphe_cli' app.revanced.cli.command.MainCommandKt patch '$stock_input' -o '$patched_apk' -p '$patches_jar' --keystore=$ks_file --keystore-entry-password='${KS_PASS}' --keystore-password='${KS_PASS}' --signer=abhishek --keystore-entry-alias=abhishek -t '$tmp_files' $patcher_args"
 	else
 		cmd="java -jar '$cli_jar' patch '$stock_input' -o '$patched_apk' -p '$patches_jar' --keystore=$ks_file --keystore-entry-password='${KS_PASS}' --keystore-password='${KS_PASS}' --signer=abhishek --keystore-entry-alias=abhishek -t '$tmp_files' $patcher_args"
 	fi

@@ -1,6 +1,6 @@
 {
-  "version": "v9.37.54 (patches dev.1.mpp)",
-  "versionCode": 37,
-  "zipUrl": "https://github.com/TheBizarreAbhishek/morphe-builder/releases/download/37/music-anddea-module-v9.37.54-arm-v7a.zip",
+  "version": "v9.40.51 (patches dev.2.mpp)",
+  "versionCode": 39,
+  "zipUrl": "https://github.com/TheBizarreAbhishek/morphe-builder/releases/download/39/music-anddea-module-v9.40.51-arm-v7a.zip",
   "changelog": "https://raw.githubusercontent.com/TheBizarreAbhishek/morphe-builder/update/build.md"
 }

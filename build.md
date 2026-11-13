@@ -1,17 +1,16 @@
-Music-Morphe (arm64-v8a): 9.30.53  
-Music-Morphe (arm-v7a): 9.30.53  
-Reddit-Morphe: 2026.40.0  
-YouTube-Morphe: 21.30.216  
+Music-Anddea (arm64-v8a): 9.45.51  
+Music-Anddea (arm-v7a): 9.45.51  
+YouTube-Anddea: 21.45.88  
 
 Install [Microg](https://github.com/ReVanced/GmsCore/releases) for non-root YouTube and YT Music APKs  
 
 [morphe-builder](https://github.com/${GITHUB_REPOSITORY-})
   
-Patches: MorpheApp/patches-2.2.0.mpp  
-[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v2.2.0)
+Patches: anddea/patches-4.4.0-dev.7.mpp  
+[Changelog](https://github.com/anddea/revanced-patches/releases/tag/v4.4.0-dev.7)
 
-CLI: MorpheApp/morphe-desktop-2.1.1-all.jar    
+CLI: ReVanced/revanced-cli-6.0.0-all.jar    
 
 Skipped:  
 Patches: RookieEnough/patches-1.6.4.mpp    
-Patches: anddea/patches-4.4.0-dev.6.mpp    
+Patches: MorpheApp/patches-2.2.0.mpp    
